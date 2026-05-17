@@ -1,0 +1,1 @@
+print("¡Hola! El entorno de AUDIODATA está listo para programar.")
