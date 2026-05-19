@@ -16,6 +16,7 @@
         <p><strong>Oyentes en Last.fm:</strong> {{ artista.metricas.lastfm_oyentes }}</p>
         <p><strong>Nota original (Rate Your Music):</strong> {{ artista.metricas.rym_nota_original }} / 5</p>
         <p><strong>Etiquetas:</strong> {{ artista.generos_consolidados | join(', ') }}</p>
+        <p><strong>ID en Discogs:</strong> {{ artista.enlaces.discogs_id }}</p>
 
         <hr>
         <h3>Comparativa Normalizada (Escala 0-100)</h3>
@@ -23,7 +24,7 @@
     </div>
 
     <script>
-        // Le pasamos la nota normalizada (84.0) desde Python a Javascript
+        // Le pasamos la nota normalizada desde Python a Javascript
         const notaNormalizada = {{ artista.metricas.rym_nota_normalizada }};
         
         const ctx = document.getElementById('miGrafico');
