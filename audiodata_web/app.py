@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, render_template
 import sys
 import os
 
@@ -29,8 +29,10 @@ def buscar_artista(nombre_artista):
     # 2. Transformación (Capa de Negocio)
     artista_unificado = normalizar_datos(nombre_artista, datos_lastfm, datos_rym)
     
-    # 3. Presentación (Devolvemos los datos al navegador en formato JSON)
-    return jsonify(artista_unificado)
+    # 3. Presentación (Devolvemos los datos inyectados en la plantilla HTML)
+    # Aquí es donde le pasamos nuestros datos de Python (artista_unificado) 
+    # a la variable 'artista' que espera el archivo HTML.
+    return render_template('dashboard.html', artista=artista_unificado)
 
 if __name__ == '__main__':
     # Arrancamos el servidor local

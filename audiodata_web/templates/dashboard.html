@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>AUDIODATA - {{ artista.nombre_canonico }}</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background-color: #f8f9fa; }
+        .tarjeta { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 600px; }
+    </style>
+</head>
+<body>
+    <div class="tarjeta">
+        <h1>Análisis de: {{ artista.nombre_canonico }}</h1>
+        
+        <p><strong>Oyentes en Last.fm:</strong> {{ artista.metricas.lastfm_oyentes }}</p>
+        <p><strong>Nota original (Rate Your Music):</strong> {{ artista.metricas.rym_nota_original }} / 5</p>
+        <p><strong>Etiquetas:</strong> {{ artista.generos_consolidados | join(', ') }}</p>
+
+        <hr>
+        <h3>Comparativa Normalizada (Escala 0-100)</h3>
+        <canvas id="miGrafico"></canvas>
+    </div>
+
+    <script>
+        // Le pasamos la nota normalizada (84.0) desde Python a Javascript
+        const notaNormalizada = {{ artista.metricas.rym_nota_normalizada }};
+        
+        const ctx = document.getElementById('miGrafico');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Rate Your Music (Normalizado)'],
+                datasets: [{
+                    label: 'Puntuación sobre 100',
+                    data: [notaNormalizada],
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                scales: {
+                    y: { beginAtZero: true, max: 100 }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
