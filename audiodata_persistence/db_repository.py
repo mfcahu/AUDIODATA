@@ -13,6 +13,7 @@ def inicializar_base_datos():
             rym_nota_original REAL,
             rym_nota_normalizada REAL,
             discogs_id INTEGER,
+            imagen_url TEXT,
             generos TEXT,
             fecha_captura TEXT
         )
@@ -26,24 +27,23 @@ def verificar_cache(nombre_artista):
     cursor = conexion.cursor()
     
     cursor.execute('''
-        SELECT lastfm_oyentes, rym_nota_original, rym_nota_normalizada, discogs_id, generos, fecha_captura 
+        SELECT lastfm_oyentes, rym_nota_original, rym_nota_normalizada, discogs_id, imagen_url, generos, fecha_captura 
         FROM cache_artistas WHERE LOWER(nombre_artista) = LOWER(?)
     ''', (nombre_artista,))
     fila = cursor.fetchone()
     conexion.close()
     
     if fila:
-        oyentes, nota_orig, nota_norm, d_id, generos, fecha_str = fila
+        oyentes, nota_orig, nota_norm, d_id, img_url, generos, fecha_str = fila
         fecha_captura = datetime.strptime(fecha_str, "%Y-%m-%d %H:%M:%S")
         if datetime.now() - fecha_captura < timedelta(hours=24):
             print(f"\n[BD] ¡Cache Hit! Cargando '{nombre_artista}' desde la base de datos...")
             return {
                 "nombre_canonico": nombre_artista,
                 "metricas": {"lastfm_oyentes": oyentes, "rym_nota_original": nota_orig, "rym_nota_normalizada": nota_norm},
-                "enlaces": {"discogs_id": d_id},
+                "enlaces": {"discogs_id": d_id, "imagen_url": img_url},
                 "generos_consolidados": generos.split(",") if generos else []
             }
-    print(f"\n[BD] Cache Miss: '{nombre_artista}' no está en caché o caducó.")
     return None
 
 def guardar_en_cache(artista_global):
@@ -59,8 +59,8 @@ def guardar_en_cache(artista_global):
     
     cursor.execute('''
         INSERT OR REPLACE INTO cache_artistas 
-        (nombre_artista, lastfm_oyentes, rym_nota_original, rym_nota_normalizada, discogs_id, generos, fecha_captura)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    ''', (nombre, metricas.get("lastfm_oyentes"), metricas.get("rym_nota_original"), metricas.get("rym_nota_normalizada"), enlaces.get("discogs_id"), generos_str, fecha_actual))
+        (nombre_artista, lastfm_oyentes, rym_nota_original, rym_nota_normalizada, discogs_id, imagen_url, generos, fecha_captura)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    ''', (nombre, metricas.get("lastfm_oyentes"), metricas.get("rym_nota_original"), metricas.get("rym_nota_normalizada"), enlaces.get("discogs_id"), enlaces.get("imagen_url"), generos_str, fecha_actual))
     conexion.commit()
     conexion.close()

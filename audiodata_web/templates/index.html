@@ -33,26 +33,68 @@
         button { 
             padding: 12px 25px; 
             font-size: 16px; 
-            background-color: #1DB954; /* Verde tipo Spotify */
+            background-color: #1DB954; 
             color: white; 
             border: none; 
             border-radius: 4px; 
             cursor: pointer; 
             font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
         }
         button:hover { background-color: #1aa34a; }
+        button:disabled { background-color: #a0d8b3; cursor: not-allowed; }
+
+        /* Animación del spinner (El círculo giratorio) */
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid white;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+            display: none; /* Oculto por defecto */
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
     <div class="buscador-container">
         <h1>🎵 Sistema AUDIODATA</h1>
-        <p>Introduce el nombre de un artista para integrar sus métricas desde Last.fm y Rate Your Music.</p>
+        <p>Introduce el nombre de un artista para integrar sus métricas desde Last.fm, Rate Your Music y Discogs.</p>
         
-        <form action="/buscar" method="POST">
+        <form action="/buscar" method="POST" id="formulario-busqueda">
             <input type="text" name="artista" placeholder="Ej: Queen, Rosalía, Daft Punk..." required>
             <br>
-            <button type="submit">Buscar Artista</button>
+            <button type="submit" id="btn-buscar">
+                <span class="spinner" id="icono-spinner"></span>
+                <span id="texto-boton">Buscar Artista</span>
+            </button>
         </form>
     </div>
+
+    <script>
+        // JS para mostrar el spinner y bloquear el botón al enviar el formulario
+        document.getElementById('formulario-busqueda').addEventListener('submit', function() {
+            const boton = document.getElementById('btn-buscar');
+            const spinner = document.getElementById('icono-spinner');
+            const texto = document.getElementById('texto-boton');
+
+            // 1. Desactivamos el botón para evitar doble clic accidental
+            boton.disabled = true;
+            
+            // 2. Mostramos la animación del spinner
+            spinner.style.display = 'inline-block';
+            
+            // 3. Cambiamos el texto para que el usuario sepa qué pasa
+            texto.textContent = ' Extrayendo datos...';
+        });
+    </script>
 </body>
 </html>
