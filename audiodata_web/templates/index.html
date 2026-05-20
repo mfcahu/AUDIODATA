@@ -80,20 +80,24 @@
     </div>
 
     <script>
-        // JS para mostrar el spinner y bloquear el botón al enviar el formulario
-        document.getElementById('formulario-busqueda').addEventListener('submit', function() {
-            const boton = document.getElementById('btn-buscar');
-            const spinner = document.getElementById('icono-spinner');
-            const texto = document.getElementById('texto-boton');
+        const boton = document.getElementById('btn-buscar');
+        const spinner = document.getElementById('icono-spinner');
+        const texto = document.getElementById('texto-boton');
+        const formulario = document.getElementById('formulario-busqueda');
 
-            // 1. Desactivamos el botón para evitar doble clic accidental
+        // 1. Cuando el usuario envía el formulario (Muestra el spinner)
+        formulario.addEventListener('submit', function() {
             boton.disabled = true;
-            
-            // 2. Mostramos la animación del spinner
             spinner.style.display = 'inline-block';
-            
-            // 3. Cambiamos el texto para que el usuario sepa qué pasa
             texto.textContent = ' Extrayendo datos...';
+        });
+
+        // 2. Cuando el usuario vuelve a la página (Limpia el botón)
+        window.addEventListener('pageshow', function() {
+            boton.disabled = false;
+            spinner.style.display = 'none';
+            texto.textContent = 'Buscar Artista';
+            formulario.reset();
         });
     </script>
 </body>
