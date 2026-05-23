@@ -6,11 +6,13 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: Arial, sans-serif; margin: 40px; background-color: #f8f9fa; }
-        .tarjeta { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 600px; position: relative; }
+        .tarjeta { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 700px; position: relative; }
         .btn-volver { display: inline-block; margin-top: 20px; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px; font-weight: bold; }
         .btn-volver:hover { background-color: #0056b3; }
-        /* Estilo para que la imagen flote a la derecha */
         .foto-artista { position: absolute; top: 20px; right: 20px; width: 120px; height: 120px; object-fit: cover; border-radius: 50%; border: 3px solid #007bff; }
+        h1 { margin-right: 140px; margin-top: 0; }
+        .metrica { margin: 8px 0; }
+        .fuente { font-size: 0.85em; color: #6c757d; font-style: italic; }
     </style>
 </head>
 <body>
@@ -20,29 +22,53 @@
         {% endif %}
 
         <h1>{{ artista.nombre_canonico }}</h1>
-        
-        <p><strong>Oyentes en Last.fm:</strong> {{ artista.metricas.lastfm_oyentes }}</p>
-        <p><strong>Nota (RYM):</strong> {{ artista.metricas.rym_nota_original }} / 5</p>
-        <p><strong>Etiquetas:</strong> {{ artista.generos_consolidados | join(', ') }}</p>
-        <p><strong>ID en Discogs:</strong> {{ artista.enlaces.discogs_id }}</p>
+
+        <h3>Métricas</h3>
+        <div class="metrica"><strong>Oyentes en Last.fm:</strong> {{ artista.metricas.lastfm_oyentes }} <span class="fuente">(popularidad real)</span></div>
+        <div class="metrica"><strong>Nota agregada (BEA):</strong> {{ artista.metricas.bea_nota_normalizada }} / 100 <span class="fuente">(de {{ artista.metricas.bea_num_ratings }} valoraciones)</span></div>
+        <div class="metrica"><strong>Listas críticas (BEA):</strong> aparece en {{ artista.metricas.bea_num_charts }} listas <span class="fuente">(prestigio agregado)</span></div>
+        {% if artista.enlaces.bea_pais %}
+        <div class="metrica"><strong>País de origen:</strong> {{ artista.enlaces.bea_pais }}</div>
+        {% endif %}
+
+        <h3>Descriptores</h3>
+        <div class="metrica">{{ artista.generos_consolidados | join(', ') }} <span class="fuente">(Last.fm + AllMusic)</span></div>
+
+        <h3>Identificadores</h3>
+        <div class="metrica"><strong>ID en Discogs:</strong> {{ artista.enlaces.discogs_id }}</div>
 
         <hr>
-        <h3>Comparativa Normalizada</h3>
+        <h3>Comparativa Normalizada (Escala 0-100)</h3>
         <canvas id="miGrafico"></canvas>
 
         <a href="/" class="btn-volver">← Volver al Buscador</a>
     </div>
 
     <script>
-        const notaNormalizada = {{ artista.metricas.rym_nota_normalizada }};
+        // Normalizamos la popularidad (oyentes) a una escala 0-100 usando log
+        const oyentes = {{ artista.metricas.lastfm_oyentes or 0 }};
+        const popularidadNorm = oyentes > 0 
+            ? Math.min(100, (Math.log10(oyentes) / 8) * 100) 
+            : 0;
+        
+        const notaBEA = {{ artista.metricas.bea_nota_normalizada or 0 }};
+
         const ctx = document.getElementById('miGrafico');
         new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: ['Rate Your Music (Normalizado)'],
-                datasets: [{ label: 'Puntuación sobre 100', data: [notaNormalizada], backgroundColor: 'rgba(54, 162, 235, 0.5)', borderColor: 'rgba(54, 162, 235, 1)', borderWidth: 2 }]
+                labels: ['Last.fm (popularidad)', 'BestEverAlbums (calidad crítica)'],
+                datasets: [{
+                    label: 'Puntuación sobre 100',
+                    data: [popularidadNorm.toFixed(1), notaBEA],
+                    backgroundColor: ['rgba(54, 162, 235, 0.5)', 'rgba(255, 99, 132, 0.5)'],
+                    borderColor: ['rgba(54, 162, 235, 1)', 'rgba(255, 99, 132, 1)'],
+                    borderWidth: 2
+                }]
             },
-            options: { scales: { y: { beginAtZero: true, max: 100 } } }
+            options: {
+                scales: { y: { beginAtZero: true, max: 100 } }
+            }
         });
     </script>
 </body>
