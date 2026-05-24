@@ -3,16 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <title>AUDIODATA - {{ artista.nombre_canonico }}</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; margin: 40px; background-color: #f8f9fa; }
-        .tarjeta { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 700px; position: relative; }
-        .btn-volver { display: inline-block; margin-top: 20px; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px; font-weight: bold; }
+        body { font-family: Arial, sans-serif; margin: 40px; background-color: #f8f9fa; color: #212529; }
+        .tarjeta { background: white; padding: 24px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.08); max-width: 1100px; margin: 0 auto; position: relative; }
+        h1 { margin: 0 0 4px 0; }
+        h3 { margin-top: 28px; border-bottom: 2px solid #e9ecef; padding-bottom: 6px; }
+        .btn-volver { display: inline-block; margin-top: 24px; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px; font-weight: bold; }
         .btn-volver:hover { background-color: #0056b3; }
-        .foto-artista { position: absolute; top: 20px; right: 20px; width: 120px; height: 120px; object-fit: cover; border-radius: 50%; border: 3px solid #007bff; }
-        h1 { margin-right: 140px; margin-top: 0; }
-        .metrica { margin: 8px 0; }
+        .foto-artista { position: absolute; top: 24px; right: 24px; width: 120px; height: 120px; object-fit: cover; border-radius: 50%; border: 3px solid #007bff; }
+        .cabecera { margin-right: 140px; }
+        .metrica { margin: 6px 0; }
         .fuente { font-size: 0.85em; color: #6c757d; font-style: italic; }
+
+        /* Tabla de top álbumes — ahora 3 columnas */
+        .top-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 12px; }
+        .col-fuente { background: #f8f9fa; border-radius: 6px; padding: 12px; }
+        .col-fuente h4 { margin: 0 0 12px 0; text-align: center; font-size: 1em; padding-bottom: 8px; border-bottom: 2px solid; }
+        .col-fuente.lastfm h4 { border-color: #d51007; color: #d51007; }
+        .col-fuente.allmusic h4 { border-color: #f7941d; color: #f7941d; }
+        .col-fuente.discogs h4 { border-color: #333; color: #333; }
+        .album { display: flex; gap: 8px; margin-bottom: 10px; align-items: center; }
+        .album img { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; background: #ddd; flex-shrink: 0; }
+        .album .info { font-size: 0.85em; line-height: 1.3; min-width: 0; }
+        .album .info .nombre { font-weight: bold; word-wrap: break-word; }
+        .album .info .meta { color: #6c757d; font-size: 0.9em; }
+        .album.consenso { background: #fff3cd; padding: 6px; border-radius: 4px; border-left: 3px solid #ffc107; }
+        .album-vacio { color: #adb5bd; text-align: center; padding: 12px; font-style: italic; font-size: 0.85em; }
+        .pick-badge { display: inline-block; background: #e63946; color: white; font-size: 0.75em; padding: 1px 6px; border-radius: 3px; font-weight: bold; }
+
+        /* Consenso */
+        .consenso-item { background: #d1ecf1; border-left: 4px solid #0c5460; padding: 10px 14px; margin: 6px 0; border-radius: 4px; }
+        .consenso-item .albumname { font-weight: bold; font-size: 1.05em; }
+        .consenso-item .fuentes { font-size: 0.85em; color: #495057; }
+        .sin-consenso { color: #6c757d; font-style: italic; }
     </style>
 </head>
 <body>
@@ -21,15 +44,17 @@
             <img src="{{ artista.enlaces.imagen_url }}" alt="Foto de {{ artista.nombre_canonico }}" class="foto-artista">
         {% endif %}
 
-        <h1>{{ artista.nombre_canonico }}</h1>
+        <div class="cabecera">
+            <h1>{{ artista.nombre_canonico }}</h1>
+            {% if artista.enlaces.bea_pais %}
+            <div class="fuente">{{ artista.enlaces.bea_pais }}</div>
+            {% endif %}
+        </div>
 
         <h3>Métricas</h3>
-        <div class="metrica"><strong>Oyentes en Last.fm:</strong> {{ artista.metricas.lastfm_oyentes }} <span class="fuente">(popularidad real)</span></div>
+        <div class="metrica"><strong>Oyentes en Last.fm:</strong> {{ "{:,}".format(artista.metricas.lastfm_oyentes or 0).replace(",", ".") }} <span class="fuente">(popularidad real)</span></div>
         <div class="metrica"><strong>Nota agregada (BEA):</strong> {{ artista.metricas.bea_nota_normalizada }} / 100 <span class="fuente">(de {{ artista.metricas.bea_num_ratings }} valoraciones)</span></div>
         <div class="metrica"><strong>Listas críticas (BEA):</strong> aparece en {{ artista.metricas.bea_num_charts }} listas <span class="fuente">(prestigio agregado)</span></div>
-        {% if artista.enlaces.bea_pais %}
-        <div class="metrica"><strong>País de origen:</strong> {{ artista.enlaces.bea_pais }}</div>
-        {% endif %}
 
         <h3>Descriptores</h3>
         <div class="metrica">{{ artista.generos_consolidados | join(', ') }} <span class="fuente">(Last.fm + AllMusic)</span></div>
@@ -37,39 +62,79 @@
         <h3>Identificadores</h3>
         <div class="metrica"><strong>ID en Discogs:</strong> {{ artista.enlaces.discogs_id }}</div>
 
-        <hr>
-        <h3>Comparativa Normalizada (Escala 0-100)</h3>
-        <canvas id="miGrafico"></canvas>
+        <h3>Obra destacada por fuente (Top 3)</h3>
+        {% set consenso_titulos = artista.consenso_albums | map(attribute='nombre') | map('lower') | list %}
+        <div class="top-grid">
+
+            {# Columna Last.fm #}
+            <div class="col-fuente lastfm">
+                <h4>🎧 Last.fm<br><span class="fuente">popularidad</span></h4>
+                {% set albums = artista.top_albums_por_fuente['Last.fm'] %}
+                {% if albums %}
+                    {% for a in albums %}
+                    <div class="album {% if a.nombre.lower() in consenso_titulos %}consenso{% endif %}">
+                        {% if a.imagen %}<img src="{{ a.imagen }}">{% else %}<div style="width:50px;height:50px;background:#ddd;border-radius:4px;"></div>{% endif %}
+                        <div class="info">
+                            <div class="nombre">{{ a.nombre }}</div>
+                            <div class="meta">{{ "{:,}".format(a.playcount or 0).replace(",", ".") }} plays</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}<div class="album-vacio">Sin datos</div>{% endif %}
+            </div>
+
+            {# Columna AllMusic — muestra "AllMusic Pick" si lo es, año si no, vacío si no hay nada #}
+            <div class="col-fuente allmusic">
+                <h4>📝 AllMusic<br><span class="fuente">discografía</span></h4>
+                {% set albums = artista.top_albums_por_fuente['AllMusic'] %}
+                {% if albums %}
+                    {% for a in albums %}
+                    <div class="album {% if a.nombre.lower() in consenso_titulos %}consenso{% endif %}">
+                        {% if a.imagen %}<img src="{{ a.imagen }}">{% else %}<div style="width:50px;height:50px;background:#ddd;border-radius:4px;"></div>{% endif %}
+                        <div class="info">
+                            <div class="nombre">{{ a.nombre }}</div>
+                            <div class="meta">
+                                {% if a.es_pick %}<span class="pick-badge">★ AllMusic Pick</span>
+                                {% elif a.year %}{{ a.year }}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}<div class="album-vacio">Sin datos</div>{% endif %}
+            </div>
+
+            {# Columna Discogs #}
+            <div class="col-fuente discogs">
+                <h4>💿 Discogs<br><span class="fuente">coleccionismo</span></h4>
+                {% set albums = artista.top_albums_por_fuente['Discogs'] %}
+                {% if albums %}
+                    {% for a in albums %}
+                    <div class="album {% if a.nombre.lower() in consenso_titulos %}consenso{% endif %}">
+                        {% if a.imagen %}<img src="{{ a.imagen }}">{% else %}<div style="width:50px;height:50px;background:#ddd;border-radius:4px;"></div>{% endif %}
+                        <div class="info">
+                            <div class="nombre">{{ a.nombre }}</div>
+                            <div class="meta">{{ "{:,}".format(a.have or 0).replace(",", ".") }} colecciones {% if a.year %}· {{ a.year }}{% endif %}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}<div class="album-vacio">Sin datos</div>{% endif %}
+            </div>
+        </div>
+
+        <h3>Consenso entre fuentes</h3>
+        {% if artista.consenso_albums %}
+            {% for item in artista.consenso_albums %}
+            <div class="consenso-item">
+                <div class="albumname">{{ item.nombre }}</div>
+                <div class="fuentes">Aparece en {{ item.num_fuentes }} de 3 fuentes: {{ item.fuentes | join(', ') }}</div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="sin-consenso">No hay álbumes que aparezcan en más de una fuente. Cada plataforma destaca obras distintas.</div>
+        {% endif %}
 
         <a href="/" class="btn-volver">← Volver al Buscador</a>
     </div>
-
-    <script>
-        // Normalizamos la popularidad (oyentes) a una escala 0-100 usando log
-        const oyentes = {{ artista.metricas.lastfm_oyentes or 0 }};
-        const popularidadNorm = oyentes > 0 
-            ? Math.min(100, (Math.log10(oyentes) / 8) * 100) 
-            : 0;
-        
-        const notaBEA = {{ artista.metricas.bea_nota_normalizada or 0 }};
-
-        const ctx = document.getElementById('miGrafico');
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['Last.fm (popularidad)', 'BestEverAlbums (calidad crítica)'],
-                datasets: [{
-                    label: 'Puntuación sobre 100',
-                    data: [popularidadNorm.toFixed(1), notaBEA],
-                    backgroundColor: ['rgba(54, 162, 235, 0.5)', 'rgba(255, 99, 132, 0.5)'],
-                    borderColor: ['rgba(54, 162, 235, 1)', 'rgba(255, 99, 132, 1)'],
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                scales: { y: { beginAtZero: true, max: 100 } }
-            }
-        });
-    </script>
 </body>
 </html>
