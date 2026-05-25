@@ -53,8 +53,8 @@
 
         <h3>Métricas</h3>
         <div class="metrica"><strong>Oyentes en Last.fm:</strong> {{ "{:,}".format(artista.metricas.lastfm_oyentes or 0).replace(",", ".") }} <span class="fuente">(popularidad real)</span></div>
-        <div class="metrica"><strong>Nota agregada (BEA):</strong> {{ artista.metricas.bea_nota_normalizada }} / 100 <span class="fuente">(de {{ artista.metricas.bea_num_ratings }} valoraciones)</span></div>
-        <div class="metrica"><strong>Listas críticas (BEA):</strong> aparece en {{ artista.metricas.bea_num_charts }} listas <span class="fuente">(prestigio agregado)</span></div>
+        <div class="metrica"><strong>Nota (BEA):</strong> {{ artista.metricas.bea_nota_normalizada }} / 100 <span class="fuente">(de {{ artista.metricas.bea_num_ratings }} valoraciones)</span></div>
+        <div class="metrica"><strong>Listas (BEA):</strong> aparece en {{ artista.metricas.bea_num_charts }} listas <span class="fuente">(prestigio)</span></div>
 
         <h3>Descriptores</h3>
         <div class="metrica">{{ artista.generos_consolidados | join(', ') }} <span class="fuente">(Last.fm + AllMusic)</span></div>
