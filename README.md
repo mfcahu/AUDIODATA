@@ -34,5 +34,21 @@ Since the project is containerized with Docker, running it locally is very strai
 
 1. **Clone the repository:**
    ```bash
-   git clone [https://github.com/mfcahu/AUDIODATA.git](https://github.com/mfcahu/AUDIODATA.git)
+   git clone https://github.com/mfcahu/AUDIODATA.git
    cd AUDIODATA
+   ```
+
+2. **Build the Docker image:**
+   ```bash
+   docker build -t audiodata-app .
+   ```
+
+3. **Run the container:**
+   ```bash
+   docker run -p 5000:5000 audiodata-app
+   ```
+
+4. Open your browser and navigate to `http://localhost:5000`
+
+---
+*Developed by Mario Ferreiro Cahuchola*
